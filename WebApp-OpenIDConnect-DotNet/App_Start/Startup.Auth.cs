@@ -67,7 +67,7 @@ namespace TodoList_WebApp
         // In a real multi-tenant app, you would want to validate here that the organization/user has signed up for the app.
         private string ProxyIssuerValidator(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            if (issuer.Contains("login.microsoftonline.com") || issuer.Contains("login.windows-ppe.net"))
+            if (issuer.Contains("login.microsoftonline.com"))
                 return issuer;
             throw new SecurityTokenValidationException("Unrecognized issuer.");
         }
