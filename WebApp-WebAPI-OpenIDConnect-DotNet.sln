@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList-WebApp", "WebApp-OpenIDConnect-DotNet\TodoList-WebApp.csproj", "{D4960069-0AB5-42D5-B711-722681DBCA0F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DE787D34-CC48-4A1B-9EAB-C6E732374D9E}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADAL.PCL.CoreCLR", "ADAL.PCL.CoreCLR\ADAL.PCL.CoreCLR.csproj", "{75D27855-D189-44AE-9FA9-10E729C573F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ADAL.PCL", "ADAL.PCL\ADAL.PCL.csproj", "{94569420-69B5-4031-A975-F5791E3F2F17}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ADAL.Common", "ADAL.Common", "{E8E698AE-DE92-4C06-A27B-9351DA9169F8}"
+	ProjectSection(SolutionItems) = preProject
+		ADAL.Common\AdalEventSource.cs = ADAL.Common\AdalEventSource.cs
+		ADAL.Common\AuthenticationResult.cs = ADAL.Common\AuthenticationResult.cs
+		ADAL.Common\CommonAssemblyInfo.cs = ADAL.Common\CommonAssemblyInfo.cs
+		ADAL.Common\Constants.cs = ADAL.Common\Constants.cs
+		ADAL.Common\CryptographyHelper.cs = ADAL.Common\CryptographyHelper.cs
+		ADAL.Common\EncodingHelper.cs = ADAL.Common\EncodingHelper.cs
+		ADAL.Common\LocalSettingsHelper.cs = ADAL.Common\LocalSettingsHelper.cs
+		ADAL.Common\Logger.cs = ADAL.Common\Logger.cs
+		ADAL.Common\TokenCache.cs = ADAL.Common\TokenCache.cs
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList-Service", "TodoList-Service\TodoList-Service.csproj", "{CBB00095-E678-4413-9557-A8DBE3E9BE38}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D4960069-0AB5-42D5-B711-722681DBCA0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4960069-0AB5-42D5-B711-722681DBCA0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4960069-0AB5-42D5-B711-722681DBCA0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4960069-0AB5-42D5-B711-722681DBCA0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75D27855-D189-44AE-9FA9-10E729C573F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75D27855-D189-44AE-9FA9-10E729C573F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75D27855-D189-44AE-9FA9-10E729C573F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75D27855-D189-44AE-9FA9-10E729C573F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94569420-69B5-4031-A975-F5791E3F2F17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94569420-69B5-4031-A975-F5791E3F2F17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94569420-69B5-4031-A975-F5791E3F2F17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94569420-69B5-4031-A975-F5791E3F2F17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBB00095-E678-4413-9557-A8DBE3E9BE38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBB00095-E678-4413-9557-A8DBE3E9BE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBB00095-E678-4413-9557-A8DBE3E9BE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBB00095-E678-4413-9557-A8DBE3E9BE38}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
