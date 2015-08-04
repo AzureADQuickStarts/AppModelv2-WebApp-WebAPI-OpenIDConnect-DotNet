@@ -32,7 +32,7 @@ namespace TodoList_WebApp.Controllers
                 ClientCredential credential = new ClientCredential(Startup.clientId, Startup.clientSecret);
                 
                 // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
-                AuthenticationContext authContext = new AuthenticationContext(authority, false, new NaiveSessionCache(userObjectID));                
+                AuthenticationContext authContext = new AuthenticationContext(authority, new NaiveSessionCache(userObjectID));                
                 result = await authContext.AcquireTokenSilentAsync(new string[] { Startup.clientId }, credential, UserIdentifier.AnyUser);
 
                 HttpClient client = new HttpClient();

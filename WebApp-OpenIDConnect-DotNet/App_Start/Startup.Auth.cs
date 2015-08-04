@@ -60,7 +60,7 @@ namespace TodoList_WebApp
             ClientCredential cred = new ClientCredential(clientId, clientSecret);
            
             // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
-            var authContext = new Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(authority, false, new NaiveSessionCache(userObjectId));
+            var authContext = new Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(authority, new NaiveSessionCache(userObjectId));
             var authResult = await authContext.AcquireTokenByAuthorizationCodeAsync(notification.Code, new Uri(redirectUri), cred, new string[] { clientId });
         }
 
