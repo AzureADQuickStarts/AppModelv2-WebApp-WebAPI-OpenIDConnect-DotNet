@@ -35,6 +35,10 @@ namespace TodoList_WebApp
             app.UseOpenIdConnectAuthentication(
                 new OpenIdConnectAuthenticationOptions
                 {
+                    // The `Authority` represents the v2.0 endpoint - https://login.microsoftonline.com/common/v2.0
+                    // The `Scope` describes the permissions that your app will need.  See https://azure.microsoft.com/documentation/articles/active-directory-v2-scopes/
+                    // In a real application you could use issuer validation for additional checks, like making sure the user's organization has signed up for your app, for instance.
+
                     ClientId = clientId,
                     Authority = String.Format(CultureInfo.InvariantCulture, aadInstance, "common", "/v2.0"),
                     Scope = "openid offline_access",
@@ -44,6 +48,9 @@ namespace TodoList_WebApp
                     {
                         ValidateIssuer = false,
                     },
+
+                    // The `AuthorizationCodeReceived` notification is used to capture and redeem the authorization_code that the v2.0 endpoint returns to your app.
+
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
                         AuthenticationFailed = OnAuthenticationFailed,
