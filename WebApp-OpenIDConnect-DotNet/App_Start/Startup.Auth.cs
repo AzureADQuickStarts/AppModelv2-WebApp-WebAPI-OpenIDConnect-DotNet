@@ -14,7 +14,7 @@ using Microsoft.Owin.Security.Notifications;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 using TodoList_WebApp.Utils;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory;
 using System.Security.Claims;
 
 namespace TodoList_WebApp
@@ -42,7 +42,7 @@ namespace TodoList_WebApp
                     PostLogoutRedirectUri = redirectUri,
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                        IssuerValidator = ProxyIssuerValidator,
+                        ValidateIssuer = false,
                     },
                     Notifications = new OpenIdConnectAuthenticationNotifications
                     {
@@ -60,16 +60,8 @@ namespace TodoList_WebApp
             ClientCredential cred = new ClientCredential(clientId, clientSecret);
            
             // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
-            var authContext = new Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(authority, false, new NaiveSessionCache(userObjectId));
+            var authContext = new Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(authority, false, new NaiveSessionCache(userObjectId));
             var authResult = await authContext.AcquireTokenByAuthorizationCodeAsync(notification.Code, new Uri(redirectUri), cred, new string[] { clientId });
-        }
-
-        // In a real multi-tenant app, you would want to validate here that the organization/user has signed up for the app.
-        private string ProxyIssuerValidator(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
-        {
-            if (issuer.Contains("login.microsoftonline.com"))
-                return issuer;
-            throw new SecurityTokenValidationException("Unrecognized issuer.");
         }
 
         private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
