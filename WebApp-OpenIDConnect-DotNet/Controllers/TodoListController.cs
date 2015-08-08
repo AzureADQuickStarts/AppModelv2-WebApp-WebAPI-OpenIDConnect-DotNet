@@ -1,5 +1,4 @@
-﻿using Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -26,14 +25,7 @@ namespace TodoList_WebApp.Controllers
             AuthenticationResult result = null;
             try
             {
-                string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
-                string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-                string authority = String.Format(CultureInfo.InvariantCulture, Startup.aadInstance, tenantID, string.Empty);
-                ClientCredential credential = new ClientCredential(Startup.clientId, Startup.clientSecret);
-                
-                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
-                AuthenticationContext authContext = new AuthenticationContext(authority, new NaiveSessionCache(userObjectID));                
-                result = await authContext.AcquireTokenSilentAsync(new string[] { Startup.clientId }, credential, UserIdentifier.AnyUser);
+                // TODO: Get an access token from ADAL
 
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, serviceUrl + "/api/todolist");
@@ -49,25 +41,14 @@ namespace TodoList_WebApp.Controllers
                 }
                 else
                 {
-                    // If the call failed with access denied, then drop the current access token from the cache, 
-                    // and show the user an error indicating they might need to sign-in again.
-                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    {
-                        var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Scope.Contains(Startup.clientId));
-                        foreach (TokenCacheItem tci in todoTokens)
-                            authContext.TokenCache.DeleteItem(tci);
-
-                        return new RedirectResult("/Error?message=Error: " + response.ReasonPhrase + " You might need to sign in again.");
-                    }
+                    // TODO: Handle an unauthorized request.
                 }
 
                 return new RedirectResult("/Error?message=An Error Occurred Reading To Do List: " + response.StatusCode);
             }
-            catch (AdalException ee)
-            {
-                // If ADAL could not get a token silently, show the user an error indicating they might need to sign in again.
-                return new RedirectResult("/Error?message=An Error Occurred Reading To Do List: " + ee.Message + " You might need to log out and log back in.");
-            }
+            
+            // TODO: Catch an exception from ADAL
+
             catch (Exception ex)
             {
                 return new RedirectResult("/Error?message=An Error Occurred Reading To Do List: " + ex.Message);
