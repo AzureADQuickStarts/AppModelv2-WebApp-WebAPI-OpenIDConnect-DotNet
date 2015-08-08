@@ -22,21 +22,18 @@ namespace TodoList_Service
             {
                 // The web app and the service are sharing the same clientId
                 ValidAudience = clientId,
-                IssuerValidator = new IssuerValidator(ProxyIssuerValidator)
+                ValidateIssuer = false,
             };
+
+            // NOTE: The usual WindowsAzureActiveDirectoryBearerAuthenticaitonMiddleware uses a
+            // metadata endpoint which is not supported by the v2.0 endpoint.  Instead, this 
+            // OpenIdConenctCachingSecurityTokenProvider can be used to fetch & use the OpenIdConnect
+            // metadata document.
 
             app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions
             {
                 AccessTokenFormat = new JwtFormat(tvps, new OpenIdConnectCachingSecurityTokenProvider("https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration")),
             });
-        }
-
-        // In a real multi-tenant app, you would want to validate here that the organization/user has signed up for the app.
-        private string ProxyIssuerValidator(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters)
-        {
-            if (issuer.Contains("login.microsoftonline.com"))
-                return issuer;
-            throw new SecurityTokenValidationException("Unrecognized issuer.");
         }
     }
 }
