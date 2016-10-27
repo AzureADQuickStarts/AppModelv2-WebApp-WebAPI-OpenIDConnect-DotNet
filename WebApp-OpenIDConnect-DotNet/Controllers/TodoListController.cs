@@ -42,8 +42,6 @@ namespace TodoList_WebApp.Controllers
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, serviceUrl + "/api/todolist");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
 
-                Console.Out.WriteLine("Request: " + request.ToString());
-
                 HttpResponseMessage response = await client.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
