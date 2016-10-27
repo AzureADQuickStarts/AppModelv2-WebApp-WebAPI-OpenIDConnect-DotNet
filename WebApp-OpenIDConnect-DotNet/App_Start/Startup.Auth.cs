@@ -14,8 +14,10 @@ using Microsoft.Owin.Security.Notifications;
 using System.IdentityModel.Tokens;
 using System.Net.Http;
 using TodoList_WebApp.Utils;
-using Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory;
 using System.Security.Claims;
+
+using Microsoft.Identity.Client;
+using System.Threading;
 
 namespace TodoList_WebApp
 {
@@ -25,6 +27,7 @@ namespace TodoList_WebApp
         public static string clientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         public static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
+        private ConfidentialClientApplication app = null;
 
         public void ConfigureAuth(IAppBuilder app)
         {
@@ -57,18 +60,21 @@ namespace TodoList_WebApp
                         AuthorizationCodeReceived = OnAuthorizationCodeReceived,
                     }
                 });
-        }
+    }
 
         private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification notification)
         {
             string userObjectId = notification.AuthenticationTicket.Identity.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
             string tenantID = notification.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
             string authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenantID, string.Empty);
-            ClientCredential cred = new ClientCredential(clientId, clientSecret);
-           
+            ClientCredential cred = new ClientCredential(clientSecret);
+
+
             // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
-            var authContext = new Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(authority, new NaiveSessionCache(userObjectId));
-            var authResult = await authContext.AcquireTokenByAuthorizationCodeAsync(notification.Code, new Uri(redirectUri), cred, new string[] { clientId });
+            app = new ConfidentialClientApplication(Startup.clientId, redirectUri, cred, new NaiveSessionCache(userObjectId, notification.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase)) {};
+            var authResult = await app.AcquireTokenByAuthorizationCodeAsync(new string[] { clientId }, notification.Code);
+
+            return;
         }
 
         private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
