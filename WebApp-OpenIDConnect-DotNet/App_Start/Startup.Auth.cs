@@ -14,6 +14,9 @@ using System.Net.Http;
 using TodoList_WebApp.Utils;
 using System.Security.Claims;
 
+using Microsoft.Identity.Client;
+using System.Threading;
+
 namespace TodoList_WebApp
 {
     public partial class Startup
@@ -22,6 +25,7 @@ namespace TodoList_WebApp
         public static string clientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         public static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
+        private ConfidentialClientApplication app = null;
 
         public void ConfigureAuth(IAppBuilder app)
         {

@@ -17,19 +17,23 @@ namespace TodoList_WebApp.Controllers
     [Authorize]
     public class TodoListController : Controller
     {
+        private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
         private static string serviceUrl = ConfigurationManager.AppSettings["ida:TodoServiceUrl"];
+        private ConfidentialClientApplication app = null;
 
         // GET: TodoList
         public async Task<ActionResult> Index()
         {
             AuthenticationResult result = null;
+
             try
             {
-                // TODO: Get an access token from ADAL
+                // TODO: Get an access token from MSAL
 
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, serviceUrl + "/api/todolist");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
+
                 HttpResponseMessage response = await client.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
@@ -46,8 +50,8 @@ namespace TodoList_WebApp.Controllers
 
                 return new RedirectResult("/Error?message=An Error Occurred Reading To Do List: " + response.StatusCode);
             }
-            
-            // TODO: Catch an exception from ADAL
+
+            // TODO: Catch an exception from MSAL
 
             catch (Exception ex)
             {
@@ -66,11 +70,11 @@ namespace TodoList_WebApp.Controllers
                 string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
                 string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
                 string authority = String.Format(CultureInfo.InvariantCulture, Startup.aadInstance, tenantID, string.Empty);
-                ClientCredential credential = new ClientCredential(Startup.clientId, Startup.clientSecret);
+                ClientCredential credential = new ClientCredential(Startup.clientSecret);
 
-                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.                
-                AuthenticationContext authContext = new AuthenticationContext(authority, false, new NaiveSessionCache(userObjectID));
-                result = await authContext.AcquireTokenSilentAsync(new string[] { Startup.clientId }, credential, UserIdentifier.AnyUser);
+                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.    
+                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectID, this.HttpContext)) { };
+                result = await app.AcquireTokenSilentAsync(new string[] { Startup.clientId });
 
                 HttpContent content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Description", description) });
                 HttpClient client = new HttpClient();
@@ -89,9 +93,7 @@ namespace TodoList_WebApp.Controllers
                     // and show the user an error indicating they might need to sign-in again.
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
-                        var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Scope.Contains(Startup.clientId));
-                        foreach (TokenCacheItem tci in todoTokens)
-                            authContext.TokenCache.DeleteItem(tci);
+                        app.AppTokenCache.Clear(Startup.clientId);
 
                         return new RedirectResult("/Error?message=Error: " + response.ReasonPhrase + " You might need to sign in again.");
                     }
@@ -99,9 +101,9 @@ namespace TodoList_WebApp.Controllers
 
                 return new RedirectResult("/Error?message=Error reading your To-Do List.");
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                // If ADAL could not get a token silently, show the user an error indicating they might need to sign in again.
+                // If MSAL could not get a token silently, show the user an error indicating they might need to sign in again.
                 return new RedirectResult("/Error?message=Error: " + ex.Message + " You might need to sign in again.");
             }
             catch (Exception ex)
@@ -121,11 +123,11 @@ namespace TodoList_WebApp.Controllers
                 string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
                 string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
                 string authority = String.Format(CultureInfo.InvariantCulture, Startup.aadInstance, tenantID, string.Empty);
-                ClientCredential credential = new ClientCredential(Startup.clientId, Startup.clientSecret);
+                ClientCredential credential = new ClientCredential(Startup.clientSecret);
 
-                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.                
-                AuthenticationContext authContext = new AuthenticationContext(authority, false, new NaiveSessionCache(userObjectID));
-                result = await authContext.AcquireTokenSilentAsync(new string[] { Startup.clientId }, credential, UserIdentifier.AnyUser);
+                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.     
+                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectID, this.HttpContext)) { };
+                result = await app.AcquireTokenSilentAsync(new string[] { Startup.clientId });
 
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, serviceUrl + "/api/todolist/" + id);
@@ -142,9 +144,7 @@ namespace TodoList_WebApp.Controllers
                     // and show the user an error indicating they might need to sign-in again.
                     if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                     {
-                        var todoTokens = authContext.TokenCache.ReadItems().Where(a => a.Scope.Contains(Startup.clientId));
-                        foreach (TokenCacheItem tci in todoTokens)
-                            authContext.TokenCache.DeleteItem(tci);
+                        app.AppTokenCache.Clear(Startup.clientId);
 
                         return new RedirectResult("/Error?message=Error: " + response.ReasonPhrase + " You might need to sign in again.");
                     }
@@ -152,9 +152,9 @@ namespace TodoList_WebApp.Controllers
 
                 return new RedirectResult("/Error?message=Error deleting your To-Do Item.");
             }
-            catch (AdalException ex)
+            catch (MsalException ex)
             {
-                // If ADAL could not get a token silently, show the user an error indicating they might need to sign in again.
+                // If MSAL could not get a token silently, show the user an error indicating they might need to sign in again.
                 return new RedirectResult("/Error?message=Error: " + ex.Message + " You might need to sign in again.");
             }
             catch (Exception ex)
