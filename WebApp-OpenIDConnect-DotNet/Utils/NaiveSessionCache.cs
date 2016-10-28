@@ -1,8 +1,10 @@
-﻿using Microsoft.Experimental.IdentityModel.Clients.ActiveDirectory;
+﻿using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace TodoList_WebApp.Utils
@@ -12,11 +14,14 @@ namespace TodoList_WebApp.Utils
         private static readonly object FileLock = new object();
         string UserObjectId = string.Empty;
         string CacheId = string.Empty;
-        public NaiveSessionCache(string userId)
+        HttpContextBase httpContext = null; 
+
+        public NaiveSessionCache(string userId, HttpContextBase httpcontext)
         {
             UserObjectId = userId;
             CacheId = UserObjectId + "_TokenCache";
-            
+            httpContext = httpcontext;
+
             this.AfterAccess = AfterAccessNotification;
             this.BeforeAccess = BeforeAccessNotification;
             Load();
@@ -26,7 +31,14 @@ namespace TodoList_WebApp.Utils
         {
             lock (FileLock)
             {
-                this.Deserialize((byte[])HttpContext.Current.Session[CacheId]);
+                try
+                {
+                    this.Deserialize((byte[])httpContext.Session[CacheId]);
+                } catch (NullReferenceException e)
+                {
+                    Console.Out.WriteLine("Problem looking up the current session: " + e.ToString());
+                }
+      
             }
         }
 
@@ -34,34 +46,34 @@ namespace TodoList_WebApp.Utils
         {
             lock (FileLock)
             {
-                // reflect changes in the persistent store
-                HttpContext.Current.Session[CacheId] = this.Serialize();
-                // once the write operation took place, restore the HasStateChanged bit to false
-                this.HasStateChanged = false;
+                try
+                {
+                    // reflect changes in the persistent store
+                    httpContext.Session[CacheId] = this.Serialize();
+                    // once the write operation took place, restore the HasStateChanged bit to false
+                    this.HasStateChanged = false;
+                } catch (NullReferenceException e)
+                {
+                    Console.Out.WriteLine("Problem setting the file lock: " + e.ToString());
+                }
             }
         }
 
         // Empties the persistent store.
-        public override void Clear()
+        public override void Clear(String clientId)
         {
-            base.Clear();
-            System.Web.HttpContext.Current.Session.Remove(CacheId);
+            base.Clear(clientId);
+            httpContext.Session.Remove(CacheId);
         }
 
-        public override void DeleteItem(TokenCacheItem item)
-        {
-            base.DeleteItem(item);
-            Persist();
-        }
-
-        // Triggered right before ADAL needs to access the cache.
+        // Triggered right before MSAL needs to access the cache.
         // Reload the cache from the persistent store in case it changed since the last access.
         void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
             Load();
         }
 
-        // Triggered right after ADAL accessed the cache.
+        // Triggered right after MSAL accessed the cache.
         void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
