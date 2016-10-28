@@ -1,5 +1,4 @@
-﻿using Microsoft.Identity.Client;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -29,14 +28,7 @@ namespace TodoList_WebApp.Controllers
 
             try
             {
-                string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
-                string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-                string authority = String.Format(CultureInfo.InvariantCulture, Startup.aadInstance, tenantID, string.Empty);
-                ClientCredential credential = new ClientCredential(Startup.clientSecret);
-
-                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
-                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectID, this.HttpContext)){};
-                result = await app.AcquireTokenSilentAsync(new string[] { Startup.clientId });
+                // TODO: Get an access token from MSAL
 
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, serviceUrl + "/api/todolist");
@@ -53,23 +45,14 @@ namespace TodoList_WebApp.Controllers
                 }
                 else
                 {
-                    // If the call failed with access denied, then drop the current access token from the cache, 
-                    // and show the user an error indicating they might need to sign-in again.
-                    if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    {
-                        app.AppTokenCache.Clear(Startup.clientId);
-
-                        return new RedirectResult("/Error?message=Error: " + response.ReasonPhrase + " You might need to sign in again.");
-                    }
+                    // TODO: Handle an unauthorized request.
                 }
 
                 return new RedirectResult("/Error?message=An Error Occurred Reading To Do List: " + response.StatusCode);
             }
-            catch (MsalException ee)
-            {
-                // If MSAL could not get a token silently, show the user an error indicating they might need to sign in again.
-                return new RedirectResult("/Error?message=An Error Occurred Reading To Do List: " + ee.Message + " You might need to log out and log back in.");
-            }
+
+            // TODO: Catch an exception from MSAL
+
             catch (Exception ex)
             {
                 return new RedirectResult("/Error?message=An Error Occurred Reading To Do List: " + ex.Message);
