@@ -1,7 +1,3 @@
-# v2-WebApp-WebAPI-OpenIDConnect-DotNet
-
-# Calling an ASP.NET Web API from an ASP.NET Web application using Azure AD V2
-
 ---
 services: active-directory
 platforms: dotnet
@@ -11,6 +7,8 @@ client: ASP.NET Web App
 service: ASP.NET Web API
 endpoint: AAD V2
 ---
+
+# Calling an ASP.NET Web API from an ASP.NET Web application using Azure AD V2
 
 ## About this sample
 
@@ -24,7 +22,6 @@ For more information about the On-behalf-of flow please see [this document](http
 
 > Pre-requisites: This sample requires Visual Studio 2015 Update 3 or Visual Studio 2017. Don’t have it? Download [Visual Studio 2017 for free](https://www.visualstudio.com/downloads/).
 
-
 ### Step 1: Download or clone this sample
 
 You can clone this sample from your shell or command line:
@@ -35,7 +32,6 @@ You can clone this sample from your shell or command line:
 
 ### Step 2: Register your Web API - *TodoList-Service* in the *Application registration portal*
 
-1. Open the solution in Visual Studio to configure 
 1. Sign in to the [Application registration portal](https://apps.dev.microsoft.com/portal/register-app) either using a personal Microsoft account (live.com or hotmail.com) or work or school account.
 1. Give a name to your Application, such as `WebApp-WebAPI-OpenIDConnect-DotNet-TodoList-Service`. Make sure that the *Guided Setup* option is **Unchecked**. Then press **Create**. The portal will assign your app a globally unique *Application ID* that you'll use later in your code.
 1. Click **Add Platform**, and select **Web API**
@@ -65,3 +61,37 @@ In this step, you configure your *TodoList-WebApp* projectby registering a new a
 
 1. Open the **web.config** file located in the **TodoList-WebApp** project's root folder and then paste the password from the previous step in the `ida:ClientSecret` parameter value
 1. Go back to the *Application registration portal*, copy the value of the **Application Id**, and then paste it under `ida:ClientId` parameter value
+
+### Step 6: Run your project
+
+1. Press `<F5>` to run your project. Your *TodoList-WebApp* should open.
+1. Select **Sign in** in the top right and sign in either by using a personal Microsoft account (live.com or hotmail.com) or work or school account.
+1. At this point, if you are signing in for the first time, you may be prompted to consent to *TodoList-Service* Web Api.
+1. Select **To-Do** menu to request an access token to the *access_as_user* scope on behalf of the logged user to access *TodoList-Service* Web Api and manipulate the *To-Do* list.
+
+## Optional: Restrict sign-in access to your application
+
+By default, when download this code sample and configure the application to use the Azure Active Directory v2 endpoint following the preceeding steps, both personal accounts - like outlook.com, live.com, and others - as well as Work or school accounts from any organizations that are integrated with Azure AD can sign in to your application. This is typically used on SaaS applications.
+
+To restrict who can sign in to your application, use one of the options:
+
+### Restrict access to a single organization (single-tenant)
+
+You can restrict sign-in access for your application to only user accounts that are in a single Azure AD tenant - including *guest accounts* of that tenant. This scenario is a common for *line-of-business applications*:
+
+1. In the **web.config** file of your **TodoList-WebApp**, change the value for the `Tenant` parameter from `Common` to the tenant name of the organization, such as `contoso.onmicrosoft.com`.
+2. In your [OWIN Startup class](#configure-the-authentication-pipeline), set the `ValidateIssuer` argument to `true`.
+
+### Restrict access to a list of organizations
+
+You can restrict sign-in access to only user accounts that are in a specific list of Azure AD organizations:
+
+You can restrict sign-in access to only user accounts that are in an Azure AD organization that is in the list of allowed organizations:
+
+1. In your [OWIN Startup class](#configure-the-authentication-pipeline), set the `ValidateIssuer` argument to `true`.
+2. Set the value of the `ValidIssuers` parameter to the list of allowed organizations.
+
+#### Use a custom method to validate issuers
+
+You can implement a custom method to validate issuers by using the **IssuerValidator** parameter. For more information about how to use this parameter, read about the [TokenValidationParameters class](https://msdn.microsoft.com/library/system.identitymodel.tokens.tokenvalidationparameters.aspx) on MSDN.
+
