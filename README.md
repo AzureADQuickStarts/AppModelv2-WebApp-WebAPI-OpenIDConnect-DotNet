@@ -55,7 +55,7 @@ You can clone this sample from your shell or command line:
 In this step, you configure your *TodoList-WebApp* projectby registering a new application in the Application registration portal. In the cases where the client and server are considered *the same application* you may also just reuse the same application registered in the 'Step 2.'.
 
 1. Go back to [Application registration portal](https://apps.dev.microsoft.com/portal/register-app) to register a new application
-1. Give a name to your Application, make sure that the *Guided Setup* option is **Unchecked**. Then press **Create**.
+1. Give a name to your Application, such as `WebApp-WebAPI-OpenIDConnect-DotNet-TodoList-WebApp`, make sure that the *Guided Setup* option is **Unchecked**. Then press **Create**.
 1. Click **Add Platform**, and select **Web**.
 1. In the Redirect URLs field, add `https://localhost:44326/` - which is the *TodoList-WebApp* project's SSL URL
 1. Under **Application Secrets**, click **Generate New Password**. Copy the password to a safe location as it won't be displayed anymore: you will need use this value in the next step.
