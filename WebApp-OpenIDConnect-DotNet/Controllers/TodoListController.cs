@@ -22,6 +22,9 @@ namespace TodoList_WebApp.Controllers
         private static string serviceUrl = ConfigurationManager.AppSettings["ida:TodoServiceUrl"];
         private ConfidentialClientApplication app = null;
 
+        // A sample 
+
+
         // GET: TodoList
         public async Task<ActionResult> Index()
         {
@@ -29,14 +32,18 @@ namespace TodoList_WebApp.Controllers
 
             try
             {
-                string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
-                string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-                string authority = String.Format(CultureInfo.InvariantCulture, Startup.aadInstance, tenantID, string.Empty);
+                string userObjectId = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
                 ClientCredential credential = new ClientCredential(Startup.clientSecret);
 
                 // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
-                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectID, this.HttpContext)){};
-                result = await app.AcquireTokenSilentAsync(new string[] { Startup.clientId });
+                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectId, this.HttpContext));
+
+                //Request an access token to access your Web API using api://{WebAPIClientId}/{Scope}
+                result = await app.AcquireTokenSilentAsync(new string[]
+                {
+                    Startup.MyWebApiScope,
+                });
 
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, serviceUrl + "/api/todolist");
@@ -84,14 +91,18 @@ namespace TodoList_WebApp.Controllers
 
             try
             {
-                string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
-                string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-                string authority = String.Format(CultureInfo.InvariantCulture, Startup.aadInstance, tenantID, string.Empty);
+                string userObjectId = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
                 ClientCredential credential = new ClientCredential(Startup.clientSecret);
 
-                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.    
-                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectID, this.HttpContext)) { };
-                result = await app.AcquireTokenSilentAsync(new string[] { Startup.clientId });
+                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
+                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectId, this.HttpContext));
+
+                //Request an access token to access your Web API using api://{WebAPIClientId}/{Scope}
+                result = await app.AcquireTokenSilentAsync(new string[]
+                {
+                    Startup.MyWebApiScope,
+                });
 
                 HttpContent content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Description", description) });
                 HttpClient client = new HttpClient();
@@ -137,15 +148,19 @@ namespace TodoList_WebApp.Controllers
 
             try
             {
-                string userObjectID = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
-                string tenantID = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-                string authority = String.Format(CultureInfo.InvariantCulture, Startup.aadInstance, tenantID, string.Empty);
+                string userObjectId = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
                 ClientCredential credential = new ClientCredential(Startup.clientSecret);
 
-                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.     
-                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectID, this.HttpContext)) { };
-                result = await app.AcquireTokenSilentAsync(new string[] { Startup.clientId });
+                // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
+                app = new ConfidentialClientApplication(Startup.clientId, redirectUri, credential, new NaiveSessionCache(userObjectId, this.HttpContext));
 
+                //Request an access token to access your Web API using api://{WebAPIClientId}/{Scope}
+                result = await app.AcquireTokenSilentAsync(new string[]
+                {
+                    Startup.MyWebApiScope,
+                });
+                
                 HttpClient client = new HttpClient();
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, serviceUrl + "/api/todolist/" + id);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);

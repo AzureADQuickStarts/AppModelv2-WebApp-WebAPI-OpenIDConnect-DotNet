@@ -9,19 +9,45 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Web.Mvc;
 using TodoList_Service.Models;
 
 namespace TodoList_Service.Controllers
 {
-    [Authorize]
+    [System.Web.Http.Authorize]
     public class TodoListController : ApiController
     {
         private TodoList_ServiceContext db = new TodoList_ServiceContext();
 
+        private ClaimsIdentity _userClaims;
+
+        public TodoListController()
+        {
+            _userClaims = User.Identity as ClaimsIdentity;
+        }
+
+        /// <summary>
+        /// Check the scope claims to see if a given access token was request
+        /// </summary>
+        /// <param name="scopeName">The name of the scope</param>
+        private void CheckAccessTokenScope(string scopeName)
+        {
+            // Make sure access_as_user scope is present
+            string scopeClaimValue = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/scope")?.Value;
+            if (!string.Equals(scopeClaimValue, scopeName, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden)
+                {
+                    ReasonPhrase = @"Please request an access token to scope '{scopeName}'"
+                });
+            }
+        }
+
         // GET: api/TodoList
         public IQueryable<Todo> GetTodoes()
         {
-            string userId = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value; 
+            CheckAccessTokenScope("access_as_user");
+            string userId = _userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
             return db.Todoes.Where(t => t.Owner.Equals(userId));
         }
 
@@ -29,12 +55,13 @@ namespace TodoList_Service.Controllers
         [ResponseType(typeof(Todo))]
         public IHttpActionResult PostTodo(Todo todo)
         {
+            CheckAccessTokenScope("access_as_user");
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            todo.Owner = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value; 
+            todo.Owner = _userClaims.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value; 
             db.Todoes.Add(todo);
             db.SaveChanges();
 
@@ -45,13 +72,14 @@ namespace TodoList_Service.Controllers
         [ResponseType(typeof(Todo))]
         public IHttpActionResult DeleteTodo(int id)
         {
+            CheckAccessTokenScope("access_as_user");
             Todo todo = db.Todoes.Find(id);
             if (todo == null)
             {
                 return NotFound();
             }
 
-            string userId = ClaimsPrincipal.Current.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
+            string userId = _userClaims.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
             if (todo.Owner != userId)
             {
                 return Unauthorized();

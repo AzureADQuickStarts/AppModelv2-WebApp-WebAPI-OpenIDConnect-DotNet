@@ -24,9 +24,14 @@ namespace TodoList_WebApp
     public partial class Startup
     {
         public static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
+        
         public static string clientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         public static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
+        private static string tenant = ConfigurationManager.AppSettings["Tenant"];
+
+        public static string MyWebApiScope = ConfigurationManager.AppSettings["MyWebAPIScope"];
+
         private ConfidentialClientApplication app = null;
 
         public void ConfigureAuth(IAppBuilder app)
@@ -38,17 +43,25 @@ namespace TodoList_WebApp
             app.UseOpenIdConnectAuthentication(
                 new OpenIdConnectAuthenticationOptions
                 {
-                    // The `Authority` represents the v2.0 endpoint - https://login.microsoftonline.com/common/v2.0
-                    // The `Scope` describes the permissions that your app will need.  See https://azure.microsoft.com/documentation/articles/active-directory-v2-scopes/
-                    // In a real application you could use issuer validation for additional checks, like making sure the user's organization has signed up for your app, for instance.
-
+                    // The Client ID is used by the application to uniquely identify itself to Azure AD.
                     ClientId = clientId,
-                    Authority = String.Format(CultureInfo.InvariantCulture, aadInstance, "common", "/v2.0"),
-                    Scope = "openid email profile offline_access",
+
+                    // The `Authority` represents the v2.0 endpoint - https://login.microsoftonline.com/{tenantname-or-common}/v2.0
+                    Authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenant),
+
+                    // Below is the list of scopes required:
+                    //    MyWebApiScope is the Web API access token scope using the format
+                    //       api://{Audience-or-AppId}/{ScopeName}
+                    //    for other scopes please see https://docs.microsoft.com/azure/active-directory/develop/active-directory-v2-scopes
+                    Scope = $"openid email profile offline_access {MyWebApiScope}",
+
                     RedirectUri = redirectUri,
                     PostLogoutRedirectUri = redirectUri,
                     TokenValidationParameters = new TokenValidationParameters
                     {
+                        // ValidateIssuer set to false to allow personal and work accounts from any organization to sign in to your application
+                        // To only allow users from a single organizations, set ValidateIssuer to true and 'tenant' setting in web.config to the tenant name
+
                         ValidateIssuer = false,
                     },
 
@@ -66,15 +79,12 @@ namespace TodoList_WebApp
         {
             string userObjectId = notification.AuthenticationTicket.Identity.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
             string tenantID = notification.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
-            string authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenantID, string.Empty);
+
             ClientCredential cred = new ClientCredential(clientSecret);
-
-
-            // Here you ask for a token using the web app's clientId as the scope, since the web app and service share the same clientId.
+            
+            // Here you ask for an access token for your service's Web API scope
             app = new ConfidentialClientApplication(Startup.clientId, redirectUri, cred, new NaiveSessionCache(userObjectId, notification.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase)) {};
-            var authResult = await app.AcquireTokenByAuthorizationCodeAsync(new string[] { clientId }, notification.Code);
-
-            return;
+            var authResult = await app.AcquireTokenByAuthorizationCodeAsync(new string[] { MyWebApiScope }, notification.Code);
         }
 
         private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)
