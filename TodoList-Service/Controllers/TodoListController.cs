@@ -19,21 +19,21 @@ namespace TodoList_Service.Controllers
     {
         private TodoList_ServiceContext db = new TodoList_ServiceContext();
 
-        private ClaimsIdentity _userClaims;
+        private ClaimsIdentity userClaims;
 
         public TodoListController()
         {
-            _userClaims = User.Identity as ClaimsIdentity;
+            userClaims = User.Identity as ClaimsIdentity;
         }
 
         /// <summary>
-        /// Check the scope claims to see if a given access token was request
+        /// Assure the presence of a scope claim containing a specific scope (i.e. access_as_user)
         /// </summary>
         /// <param name="scopeName">The name of the scope</param>
         private void CheckAccessTokenScope(string scopeName)
         {
             // Make sure access_as_user scope is present
-            string scopeClaimValue = ClaimsPrincipal.Current.FindFirst("http://schemas.microsoft.com/identity/claims/scope")?.Value;
+            string scopeClaimValue = userClaims.FindFirst("http://schemas.microsoft.com/identity/claims/scope")?.Value;
             if (!string.Equals(scopeClaimValue, scopeName, StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Forbidden)
@@ -47,7 +47,7 @@ namespace TodoList_Service.Controllers
         public IQueryable<Todo> GetTodoes()
         {
             CheckAccessTokenScope("access_as_user");
-            string userId = _userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+            string userId = userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
             return db.Todoes.Where(t => t.Owner.Equals(userId));
         }
 
@@ -61,7 +61,7 @@ namespace TodoList_Service.Controllers
                 return BadRequest(ModelState);
             }
 
-            todo.Owner = _userClaims.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value; 
+            todo.Owner = userClaims.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value; 
             db.Todoes.Add(todo);
             db.SaveChanges();
 
@@ -79,7 +79,7 @@ namespace TodoList_Service.Controllers
                 return NotFound();
             }
 
-            string userId = _userClaims.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
+            string userId = userClaims.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
             if (todo.Owner != userId)
             {
                 return Unauthorized();

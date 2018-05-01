@@ -5,13 +5,6 @@ VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList-WebApp", "WebApp-OpenIDConnect-DotNet\TodoList-WebApp.csproj", "{D4960069-0AB5-42D5-B711-722681DBCA0F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DE787D34-CC48-4A1B-9EAB-C6E732374D9E}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoList-Service", "TodoList-Service\TodoList-Service.csproj", "{CBB00095-E678-4413-9557-A8DBE3E9BE38}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3ADFFA0D-2BEF-4163-B9C1-075E7FCB7510}"
