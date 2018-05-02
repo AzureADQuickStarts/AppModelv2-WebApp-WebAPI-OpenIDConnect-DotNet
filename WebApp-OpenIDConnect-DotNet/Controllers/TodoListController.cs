@@ -19,7 +19,7 @@ namespace TodoList_WebApp.Controllers
     public class TodoListController : Controller
     {
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
-        private static string serviceUrl = ConfigurationManager.AppSettings["ida:TodoServiceUrl"];
+        private static string todoListServiceUrl = ConfigurationManager.AppSettings["TodoServiceUrl"];
         private ConfidentialClientApplication app = null;
 
         // A sample 
@@ -42,11 +42,11 @@ namespace TodoList_WebApp.Controllers
                 //Request an access token to access your Web API using api://{WebAPIClientId}/{Scope}
                 result = await app.AcquireTokenSilentAsync(new string[]
                 {
-                    Startup.MyWebApiScope,
+                    Startup.TodoListServiceScope,
                 });
 
                 HttpClient client = new HttpClient();
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, serviceUrl + "/api/todolist");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, todoListServiceUrl + "/api/todolist");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
 
                 HttpResponseMessage response = await client.SendAsync(request);
@@ -101,12 +101,12 @@ namespace TodoList_WebApp.Controllers
                 //Request an access token to access your Web API using api://{WebAPIClientId}/{Scope}
                 result = await app.AcquireTokenSilentAsync(new string[]
                 {
-                    Startup.MyWebApiScope,
+                    Startup.TodoListServiceScope,
                 });
 
                 HttpContent content = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("Description", description) });
                 HttpClient client = new HttpClient();
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, serviceUrl + "/api/todolist");
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, todoListServiceUrl + "/api/todolist");
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
                 request.Content = content;
                 HttpResponseMessage response = await client.SendAsync(request);
@@ -158,11 +158,11 @@ namespace TodoList_WebApp.Controllers
                 //Request an access token to access your Web API using api://{WebAPIClientId}/{Scope}
                 result = await app.AcquireTokenSilentAsync(new string[]
                 {
-                    Startup.MyWebApiScope,
+                    Startup.TodoListServiceScope,
                 });
                 
                 HttpClient client = new HttpClient();
-                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, serviceUrl + "/api/todolist/" + id);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, todoListServiceUrl + "/api/todolist/" + id);
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.Token);
                 HttpResponseMessage response = await client.SendAsync(request);
 

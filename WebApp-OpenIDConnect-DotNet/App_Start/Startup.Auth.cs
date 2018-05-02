@@ -28,9 +28,9 @@ namespace TodoList_WebApp
         public static string clientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         public static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
-        private static string tenant = ConfigurationManager.AppSettings["Tenant"];
+        private static string tenant = ConfigurationManager.AppSettings["ida:Tenant"];
 
-        public static string MyWebApiScope = ConfigurationManager.AppSettings["MyWebAPIScope"];
+        public static string TodoListServiceScope = ConfigurationManager.AppSettings["TodoListServiceScope"];
 
         private ConfidentialClientApplication app = null;
 
@@ -50,10 +50,10 @@ namespace TodoList_WebApp
                     Authority = String.Format(CultureInfo.InvariantCulture, aadInstance, tenant),
 
                     // Below is the list of scopes required:
-                    //    MyWebApiScope is the Web API access token scope using the format
+                    //    TodoListServiceScope is the Web API access token scope using the format
                     //       api://{Audience-or-AppId}/{ScopeName}
                     //    for other scopes please see https://docs.microsoft.com/azure/active-directory/develop/active-directory-v2-scopes
-                    Scope = $"openid email profile offline_access {MyWebApiScope}",
+                    Scope = $"openid email profile offline_access {TodoListServiceScope}",
 
                     RedirectUri = redirectUri,
                     PostLogoutRedirectUri = redirectUri,
@@ -84,7 +84,7 @@ namespace TodoList_WebApp
             
             // Here you ask for an access token for your service's Web API scope
             app = new ConfidentialClientApplication(Startup.clientId, redirectUri, cred, new NaiveSessionCache(userObjectId, notification.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase)) {};
-            var authResult = await app.AcquireTokenByAuthorizationCodeAsync(new string[] { MyWebApiScope }, notification.Code);
+            var authResult = await app.AcquireTokenByAuthorizationCodeAsync(new string[] { TodoListServiceScope }, notification.Code);
         }
 
         private Task OnAuthenticationFailed(AuthenticationFailedNotification<OpenIdConnectMessage, OpenIdConnectAuthenticationOptions> notification)

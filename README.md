@@ -47,7 +47,7 @@ You can clone this sample from your shell or command line:
 
 #### Step 3.1: Add the new scope to the *TodoList-WebApp*`s web.config
 
-1. Open the **web.config** file located in **TodoList-WebApp** project's root folder and then paste **Application Id** from the application you just registered for your *TodoList-Service* under `MyWebAPIScope` parameter, replacing the string `{Enter the Application Id of your TodoList-Service from the app registration portal}`. 
+1. Open the **web.config** file located in **TodoList-WebApp** project's root folder and then paste **Application Id** from the application you just registered for your *TodoList-Service* under `TodoListServiceScope` parameter, replacing the string `{Enter the Application Id of your TodoList-Service from the app registration portal}`. 
     > Note: Make sure it uses has the format `api://{TodoList-Service-Application-Id}/access_as_user` (where {TodoList-Service-Application-Id} is the Guid representing the Application Id for your TodoList-Service).
 
 ### Step 4: Register the *TodoList-WebApp* application in the *Application registration portal*
@@ -68,9 +68,22 @@ In this step, you configure your *TodoList-WebApp* projectby registering a new a
 ### Step 6: Run your project
 
 1. Press `<F5>` to run your project. Your *TodoList-WebApp* should open.
-1. Select **Sign in** in the top right and sign in either by using a personal Microsoft account (live.com or hotmail.com) or work or school account.
+1. Select **Sign in** in the top right and sign in either by using the same a account or an account in the same directory used to register your applications
 1. At this point, if you are signing in for the first time, you may be prompted to consent to *TodoList-Service* Web Api.
 1. Select **To-Do** menu to request an access token to the *access_as_user* scope on behalf of the logged user to access *TodoList-Service* Web Api and manipulate the *To-Do* list.
+
+
+### Optional: Pre-authorize your client application
+
+One of the ways to allow users from other directories to acces your Web API is by *pre-authorizing* the client applications to access your Web API by adding the Application Ids from client applications in the list of *pre-authorized* applications for your Web API. This is a scenario used mainly in *SaaS applications*. By adding a pre-authorized client you also avoid asking user for consent. Follow the steps below to pre-authorize your Web Application:
+
+1. Go back to the *Application registration portal* and open the properties of your **TodoList-Service**.
+1. In the **Web API platform**, click on **Add application** under the *Pre-authorized applications* section.
+1. In the *Application ID* field, paste the application ID of the **TodoList-WebApp** application.
+1. In the *Scope* field, click on the **Select** combo box and select the scope for this Web API `api://<Application ID>/access_as_user`.
+1. Press the **Save** button at the bottom of the page.
+1. Now switch back to Visual Studio and press `<F5>` to run your project. You can now sign-in with a user in any directory and access your Web API.
+
 
 ## Optional: Restrict sign-in access to your application
 
@@ -78,23 +91,36 @@ By default, when download this code sample and configure the application to use 
 
 To restrict who can sign in to your application, use one of the options:
 
-### Restrict access to a single organization (single-tenant)
+### Option 1: Restrict access to a single organization (single-tenant)
 
 You can restrict sign-in access for your application to only user accounts that are in a single Azure AD tenant - including *guest accounts* of that tenant. This scenario is a common for *line-of-business applications*:
 
-1. In the **web.config** file of your **TodoList-WebApp**, change the value for the `Tenant` parameter from `Common` to the tenant name of the organization, such as `contoso.onmicrosoft.com`.
+1. In the **web.config** file of your **TodoList-WebApp**, change the value for the `ida:Tenant` parameter from `Common` to the tenant name of the organization, such as `contoso.onmicrosoft.com`.
 2. In your [OWIN Startup class](#configure-the-authentication-pipeline), set the `ValidateIssuer` argument to `true`.
 
-### Restrict access to a list of organizations
-
-You can restrict sign-in access to only user accounts that are in a specific list of Azure AD organizations:
+### Option 2: Restrict access to a list of known organizations
 
 You can restrict sign-in access to only user accounts that are in an Azure AD organization that is in the list of allowed organizations:
 
 1. In your [OWIN Startup class](#configure-the-authentication-pipeline), set the `ValidateIssuer` argument to `true`.
 2. Set the value of the `ValidIssuers` parameter to the list of allowed organizations.
 
-#### Use a custom method to validate issuers
+
+### Option 3: Restrict the categories of users that can sign-in to your application
+
+This scenario is a common for *SaaS* applications that are focused on either consumers or organizations, therefore want to block accepting either personal accounts or work or school accounts.
+
+1. In the **web.config** file of your **TodoList-WebApp**, use on of the values below for `Tenant` parameter:
+
+    Value | Description
+    ----- | --------
+    `common` | Users can sign in with any Work and School account, or Microsoft Personal account
+    `organizations` |  Users can sign in with any Work and School account
+    `consumers` |  Users can sign in with a Microsoft Personal account
+
+    > Note: the values above are not considered a *tenant*, but a *convention* to restrict certain categories of users
+
+#### Option 4: Use a custom method to validate issuers
 
 You can implement a custom method to validate issuers by using the **IssuerValidator** parameter. For more information about how to use this parameter, read about the [TokenValidationParameters class](https://msdn.microsoft.com/library/system.identitymodel.tokens.tokenvalidationparameters.aspx) on MSDN.
 
