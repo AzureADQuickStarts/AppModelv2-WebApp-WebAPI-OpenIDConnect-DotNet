@@ -96,15 +96,14 @@ To restrict who can sign in to your application, use one of the options:
 You can restrict sign-in access for your application to only user accounts that are in a single Azure AD tenant - including *guest accounts* of that tenant. This scenario is a common for *line-of-business applications*:
 
 1. In the **web.config** file of your **TodoList-WebApp**, change the value for the `ida:Tenant` parameter from `Common` to the tenant name of the organization, such as `contoso.onmicrosoft.com`.
-2. In your [OWIN Startup class](#configure-the-authentication-pipeline), set the `ValidateIssuer` argument to `true`.
+2. Open **App_Start\Startup.Auth** file and set the `ValidateIssuer` argument to `true`.
 
 ### Option 2: Restrict access to a list of known organizations
 
 You can restrict sign-in access to only user accounts that are in an Azure AD organization that is in the list of allowed organizations:
 
-1. In your [OWIN Startup class](#configure-the-authentication-pipeline), set the `ValidateIssuer` argument to `true`.
+1. In your **App_Start\Startup.Auth** file, set the `ValidateIssuer` argument to `true`.
 2. Set the value of the `ValidIssuers` parameter to the list of allowed organizations.
-
 
 ### Option 3: Restrict the categories of users that can sign-in to your application
 
