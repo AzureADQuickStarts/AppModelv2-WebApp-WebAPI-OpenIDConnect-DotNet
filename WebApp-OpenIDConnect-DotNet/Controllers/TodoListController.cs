@@ -19,7 +19,7 @@ namespace TodoList_WebApp.Controllers
     public class TodoListController : Controller
     {
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
-        private static string todoListServiceUrl = ConfigurationManager.AppSettings["TodoServiceUrl"];
+        private static string todoListServiceUrl = ConfigurationManager.AppSettings["ida:TodoServiceUrl"];
         private ConfidentialClientApplication app = null;
 
         // A sample 

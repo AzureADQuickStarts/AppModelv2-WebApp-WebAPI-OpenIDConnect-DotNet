@@ -1,36 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Owin;
+﻿using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Protocols;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.Notifications;
 using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
+using System;
 using System.Configuration;
 using System.Globalization;
-using System.Threading.Tasks;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.Owin.Security.Notifications;
 using System.IdentityModel.Tokens;
-using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web;
 using TodoList_WebApp.Utils;
-using System.Security.Claims;
-
-using Microsoft.Identity.Client;
-using System.Threading;
 
 namespace TodoList_WebApp
 {
     public partial class Startup
     {
         public static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
-        
         public static string clientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         public static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
         private static string redirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
         private static string tenant = ConfigurationManager.AppSettings["ida:Tenant"];
-
-        public static string TodoListServiceScope = ConfigurationManager.AppSettings["TodoListServiceScope"];
+        public static string TodoListServiceScope = ConfigurationManager.AppSettings["ida:TodoListServiceScope"];
 
         private ConfidentialClientApplication app = null;
 
@@ -73,7 +65,7 @@ namespace TodoList_WebApp
                         AuthorizationCodeReceived = OnAuthorizationCodeReceived,
                     }
                 });
-    }
+        }
 
         private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification notification)
         {
@@ -81,9 +73,9 @@ namespace TodoList_WebApp
             string tenantID = notification.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid").Value;
 
             ClientCredential cred = new ClientCredential(clientSecret);
-            
+
             // Here you ask for an access token for your service's Web API scope
-            app = new ConfidentialClientApplication(Startup.clientId, redirectUri, cred, new NaiveSessionCache(userObjectId, notification.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase)) {};
+            app = new ConfidentialClientApplication(Startup.clientId, redirectUri, cred, new NaiveSessionCache(userObjectId, notification.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase)) { };
             var authResult = await app.AcquireTokenByAuthorizationCodeAsync(new string[] { TodoListServiceScope }, notification.Code);
         }
 
